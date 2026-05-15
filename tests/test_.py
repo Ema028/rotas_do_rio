@@ -1,5 +1,5 @@
 import pytest
-from utils.graph import *
+from src.graph_search import *
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 DATA_PATH = BASE_DIR / "data" / "municipios_final.csv"

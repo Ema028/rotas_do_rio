@@ -1,7 +1,7 @@
 try:
     from structs import *
 except ModuleNotFoundError:
-    from utils.structs import *
+    from src.structs import *
 from unicodedata import normalize
 from pathlib import Path
 import csv
