@@ -1,12 +1,18 @@
 from structs import *
 from unicodedata import normalize
+from pathlib import Path
 import csv
 import sys
 
 names = {} #mapear nome para um set de ids correspondentes
 municipios = {}
+test = True
 
-with open(f"../data/municipios.csv", encoding="utf-8") as f:
+BASE_DIR = Path(__file__).resolve().parent.parent
+if test: DATA_PATH = BASE_DIR / "data" / "municipios_teste.csv"
+else: DATA_PATH = BASE_DIR / "data" / "municipios_final.csv"
+
+with open(f"DATA_PATH", encoding="utf-8") as f:
     rows = list(csv.DictReader(f))
 
     for row in rows:
