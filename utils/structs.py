@@ -22,3 +22,14 @@ class QueueFrontier:
         node = self.frontier[0]
         self.frontier = self.frontier[1:]
         return node
+
+class PriorityFrontier(QueueFrontier):
+    def remove(self):
+        if self.empty(): raise Exception("empty frontier")
+        min_cost_index = 0
+        for i in range(len(self.frontier)):
+            if self.frontier[i].path_cost < self.frontier[min_cost_index].path_cost:
+                min_cost_index = i
+
+        node = self.frontier.pop(min_cost_index)
+        return node

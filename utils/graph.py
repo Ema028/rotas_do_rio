@@ -22,7 +22,6 @@ with open(DATA_PATH, encoding="utf-8") as f:
         municipios[id] = {"name": name, "neighbors": []}
 
         if name.lower() not in names: names[name.lower()] = id
-        else: names[name.lower()].add(id)
 
     for row in rows:
         neighbors_distance = []
@@ -46,23 +45,35 @@ def main():
     target = municipio_id_for_name(target)
     if target is None: sys.exit("Not found.")
 
-    path, cost = smaller_separation_degree_path(source, target)
+    path, cost = shortest_path(source, target, strategy='min_degrees')
 
     if path is None: print("Not connected.")
     else:
-        degrees = len(path)
-        print(f"Minimum of {degrees} municipios of separation if:")
-        path = [(None, source)] + path
-        for i in range(degrees):
-            municipio1 = municipios[path[i][1]]["name"]
-            municipio2 = municipios[path[i + 1][1]]["name"]
-            print(f"go from {municipio1} to {municipio2}", end=' ')
-        print(f"\n{cost}km of separation")
+        print(f"Minimum of {len(path)} municipios of separation if:")
+        print_path(path)
+        print(f"Total of {cost:.2f}km of separation\n")
 
-def smaller_separation_degree_path(source, target):
+    path, cost = shortest_path(source, target)
+    if path is None: pass
+    else:
+        print(f"Minimum of {cost:.2f}km of separation if:")
+        print_path(path)
+        print(f"Total of {len(path)} municipios of separation")
+
+def print_path(path):
+    last_index = len(path) - 1
+    for i in range(last_index):
+        municipio1 = municipios[path[i][1]]["name"]
+        municipio2 = municipios[path[i + 1][1]]["name"]
+        print(f"go from {municipio1} to {municipio2}", end=' ')
+        if i < last_index - 1: print("->", end=' ')
+        else: print("")
+
+def shortest_path(source, target, strategy='less_distance'):
     explored = set()
     start = Node(state=source, parent=None, path_cost=0)
-    frontier = QueueFrontier()
+    if strategy == 'min_degrees': frontier = QueueFrontier()
+    else: frontier = PriorityFrontier()
     frontier.add(start)
     while True:
         if frontier.empty(): return None, None
@@ -74,7 +85,7 @@ def smaller_separation_degree_path(source, target):
                 solution.append((node.parent, node.state))
                 node = node.parent
             solution.reverse()
-            return solution, cost
+            return [(None, source)] + solution, cost
         explored.add(node.state)
         for neighbor, distance in municipios[node.state]["neighbors"]:
             if not frontier.contains_state(neighbor) and neighbor not in explored:
