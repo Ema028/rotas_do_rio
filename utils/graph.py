@@ -1,4 +1,7 @@
-from structs import *
+try:
+    from structs import *
+except ModuleNotFoundError:
+    from utils.structs import *
 from unicodedata import normalize
 from pathlib import Path
 import csv
@@ -97,4 +100,5 @@ def municipio_id_for_name(name):
     if len(municipio_id) == 0: return None
     else: return municipio_id
 
-main()
+if __name__ == "__main__":
+    main()
