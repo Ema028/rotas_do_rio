@@ -1,50 +1,28 @@
+from pathlib import Path
+import sys
 try:
     from structs import *
+    from load_data import *
 except ModuleNotFoundError:
     from src.structs import *
-from unicodedata import normalize
-from pathlib import Path
-import csv
-import sys
+    from src.load_data import *
 
-names = {} #mapear nome para ids correspondentes
-municipios = {}
 test = "--test" in sys.argv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 if test: DATA_PATH = BASE_DIR / "data" / "municipios_teste.csv"
 else: DATA_PATH = BASE_DIR / "data" / "municipios_final.csv"
 
-with open(DATA_PATH, encoding="utf-8") as f:
-    rows = list(csv.DictReader(f))
-
-    for row in rows:
-        id = row["id"]
-        name =  normalize('NFKD', row["name"]).encode('ASCII', 'ignore').decode('ASCII')
-
-        municipios[id] = {"name": name, "neighbors": []}
-
-        if name.lower() not in names: names[name.lower()] = id
-
-    for row in rows:
-        neighbors_distance = []
-        for neighbor in row["neighbors"].split(','):
-            if ":" not in neighbor: continue
-            name, distance = neighbor.split(':')
-            name = name.strip().lower()
-            name = normalize('NFKD', name).encode('ASCII', 'ignore').decode('ASCII')
-            if name in names: neighbors_distance.append((names[name], float(distance)))
-        municipios[row["id"]]["neighbors"] = neighbors_distance
-
+names, municipios = load_data(DATA_PATH)
 
 def main():
     source = input("Município: ").lower().strip()
-    source = normalize('NFKD', source).encode('ASCII', 'ignore').decode('ASCII')
+    source = normalize_name(source)
     source = municipio_id_for_name(source)
     if source is None: sys.exit("Not found.")
 
     target = input("Município: ").lower().strip()
-    target = normalize('NFKD', target).encode('ASCII', 'ignore').decode('ASCII')
+    target = normalize_name(target)
     target = municipio_id_for_name(target)
     if target is None: sys.exit("Not found.")
 
@@ -97,7 +75,7 @@ def shortest_path(source, target, strategy='less_distance'):
 
 def municipio_id_for_name(name):
     municipio_id = names.get(name.lower())
-    if len(municipio_id) == 0: return None
+    if not municipio_id: return None
     else: return municipio_id
 
 if __name__ == "__main__":
