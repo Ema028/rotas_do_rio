@@ -4,32 +4,36 @@ from pathlib import Path
 import csv
 import sys
 
-names = {} #mapear nome para um set de ids correspondentes
+names = {} #mapear nome para ids correspondentes
 municipios = {}
-test = True
+test = "--test" in sys.argv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 if test: DATA_PATH = BASE_DIR / "data" / "municipios_teste.csv"
 else: DATA_PATH = BASE_DIR / "data" / "municipios_final.csv"
 
-with open(f"DATA_PATH", encoding="utf-8") as f:
+with open(DATA_PATH, encoding="utf-8") as f:
     rows = list(csv.DictReader(f))
 
     for row in rows:
         id = row["id"]
         name =  normalize('NFKD', row["name"]).encode('ASCII', 'ignore').decode('ASCII')
 
-        municipios[id] = {"name": name,
-                          "neighbors": set()}
+        municipios[id] = {"name": name, "neighbors": []}
 
-        if name.lower() not in names: names[name.lower()] = {id}
+        if name.lower() not in names: names[name.lower()] = id
         else: names[name.lower()].add(id)
 
     for row in rows:
+        neighbors_distance = []
         for neighbor in row["neighbors"].split(','):
-            name = neighbor.strip().lower()
+            if ":" not in neighbor: continue
+            name, distance = neighbor.split(':')
+            name = name.strip().lower()
             name = normalize('NFKD', name).encode('ASCII', 'ignore').decode('ASCII')
-            if name in names: municipios[row["id"]]["neighbors"].update(names[name])
+            if name in names: neighbors_distance.append((names[name], float(distance)))
+        municipios[row["id"]]["neighbors"] = neighbors_distance
+
 
 def main():
     source = input("Município: ").lower().strip()
@@ -42,53 +46,44 @@ def main():
     target = municipio_id_for_name(target)
     if target is None: sys.exit("Not found.")
 
-    path = shortest_path(source, target)
+    path, cost = smaller_separation_degree_path(source, target)
 
     if path is None: print("Not connected.")
     else:
         degrees = len(path)
-        print(f"{degrees} municípios of separation.")
+        print(f"Minimum of {degrees} municipios of separation if:")
         path = [(None, source)] + path
         for i in range(degrees):
             municipio1 = municipios[path[i][1]]["name"]
             municipio2 = municipios[path[i + 1][1]]["name"]
-            print(f"{i + 1}: go from {municipio1} to {municipio2}")
+            print(f"go from {municipio1} to {municipio2}", end=' ')
+        print(f"\n{cost}km of separation")
 
-def shortest_path(source, target):
+def smaller_separation_degree_path(source, target):
     explored = set()
     start = Node(state=source, parent=None, path_cost=0)
     frontier = QueueFrontier()
     frontier.add(start)
     while True:
-        if frontier.empty(): return None
+        if frontier.empty(): return None, None
         node = frontier.remove()
         if node.state == target:
+            cost = node.path_cost
             solution = []
             while node.parent is not None:
                 solution.append((node.parent, node.state))
                 node = node.parent
             solution.reverse()
-            return solution
+            return solution, cost
         explored.add(node.state)
-        for neighbor in municipios[node.state]["neighbors"]:
+        for neighbor, distance in municipios[node.state]["neighbors"]:
             if not frontier.contains_state(neighbor) and neighbor not in explored:
-                child = Node(state=neighbor, parent=node, path_cost=0)
+                child = Node(state=neighbor, parent=node, path_cost=node.path_cost + distance)
                 frontier.add(child)
 
 def municipio_id_for_name(name):
-    municipio_id = list(names.get(name.lower(), set()))
+    municipio_id = names.get(name.lower())
     if len(municipio_id) == 0: return None
-    elif len(municipio_id) > 1:
-        print(f"Which '{name}'?")
-        for id in municipio_id:
-            municipio = municipios[id]
-            name = municipio["name"]
-            print(f"ID: {id}, Name: {name}")
-        try:
-            id = input("Intended Person ID: ")
-            if id in municipio_id: return id
-        except ValueError: pass
-        return None
-    else: return municipio_id[0]
+    else: return municipio_id
 
 main()
