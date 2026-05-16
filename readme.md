@@ -5,6 +5,7 @@ Aplicação interativa para cálculo e visualização de rotas entre municípios
 ## Demonstração
 ![Demonstração](demo_rotas_rio.gif)
 
+🔗 [Acessar aplicação](https://rotasdorio.streamlit.app/)
 ---
 
 ## Funcionalidades
