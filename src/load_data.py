@@ -1,5 +1,6 @@
 import csv
 import os
+import json
 import inspect
 import streamlit as st
 from unicodedata import normalize
@@ -28,6 +29,10 @@ def load_data(DATA_PATH):
                 if name in names: neighbors_distance.append((names[name], float(distance)))
             municipios[row["id"]]["neighbors"] = neighbors_distance
     return names, municipios
+
+def load_coordinates(COORDINATES_PATH):
+    with open(COORDINATES_PATH, "r", encoding="utf-8") as f: coordinates = json.load(f)
+    return coordinates
 
 def normalize_name(name):
     return normalize('NFKD', name).encode('ASCII', 'ignore').decode('ASCII').lower().strip()

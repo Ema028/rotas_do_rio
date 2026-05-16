@@ -12,7 +12,7 @@ print = log
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 if test: DATA_PATH = BASE_DIR / "data" / "municipios_teste.csv"
-else: DATA_PATH = BASE_DIR / "data" / "municipios_final.csv"
+else:    DATA_PATH = BASE_DIR / "data" / "municipios_final.csv"
 
 names, municipios = load_data(DATA_PATH)
 

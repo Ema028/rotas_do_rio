@@ -2,3 +2,5 @@ pandas
 geopandas
 pytest
 streamlit
+folium
+streamlit_folium
