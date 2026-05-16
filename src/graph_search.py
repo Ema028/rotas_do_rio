@@ -28,19 +28,26 @@ def main():
     if target is None: sys.exit("Not found.")
 
     path, cost = shortest_path(source, target, strategy='min_degrees')
-
     if path is None: print("Not connected.")
     else:
         print(f"Minimum of {len(path)} municipios of separation if:")
         print_path(path)
         print(f"Total of {cost:.2f}km of separation\n")
 
-    path, cost = shortest_path(source, target)
-    if path is None: pass
+    path, cost = shortest_path(source, target, strategy='less_distance')
+    if path is None: print("Not connected.")
     else:
         print(f"Minimum of {cost:.2f}km of separation if:")
         print_path(path)
+        print(f"Total of {len(path)} municipios of separation\n")
+
+    path, cost = shortest_path(source, target)
+    if path is None: print("Not connected.")
+    else:
+        print(f"Astar found {cost:.2f}km of separation with:")
+        print_path(path)
         print(f"Total of {len(path)} municipios of separation")
+
 
 def print_path(path):
     path_names = []
@@ -48,11 +55,12 @@ def print_path(path):
         path_names.append(municipios[id_atual]["name"])
     print(" ➔ ".join(path_names))
 
-def shortest_path(source, target, strategy='less_distance'):
+def shortest_path(source, target, strategy='a_star'):
     explored = set()
     start = Node(state=source, parent=None, path_cost=0)
-    if strategy == 'min_degrees': frontier = QueueFrontier()
-    else: frontier = PriorityFrontier()
+    if   strategy == 'min_degrees'  : frontier = QueueFrontier()
+    elif strategy == 'less_distance': frontier = PriorityFrontier()
+    else:                             frontier = AstarFrontier(target)
     frontier.add(start)
     while True:
         if frontier.empty(): return None, None

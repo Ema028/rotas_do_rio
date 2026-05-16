@@ -1,8 +1,18 @@
+from heuristic import heuristic_haversine
+from pathlib import Path
+from load_data import load_coordinates
+
+BASE_DIR  = Path(__file__).resolve().parent.parent
+DATA_PATH = BASE_DIR / "data" / "coordinates.json"
+
+coordinates = load_coordinates(DATA_PATH)
+
 class Node:
     def __init__(self, state, parent, path_cost):
         self.state = state
         self.parent = parent
         self.path_cost = path_cost
+        self.estimated_cost = None
 
 class QueueFrontier:
     def __init__(self):
@@ -23,13 +33,28 @@ class QueueFrontier:
         self.frontier = self.frontier[1:]
         return node
 
+
 class PriorityFrontier(QueueFrontier):
+    def add(self, node):
+        self.frontier.append(node)
+        self.frontier.sort(key=lambda x: x.path_cost, reverse=True)
+
     def remove(self):
         if self.empty(): raise Exception("empty frontier")
-        min_cost_index = 0
-        for i in range(len(self.frontier)):
-            if self.frontier[i].path_cost < self.frontier[min_cost_index].path_cost:
-                min_cost_index = i
+        return self.frontier.pop()
 
-        node = self.frontier.pop(min_cost_index)
-        return node
+
+class AstarFrontier(PriorityFrontier):
+    def __init__(self, target, coordinates=coordinates, heuristic=heuristic_haversine):
+        super().__init__()
+        self.target = target
+        self.coordinates = coordinates
+        self.heuristic = heuristic
+
+    def add(self, node):
+        g = node.path_cost
+        h = self.heuristic(node.state, self.target, self.coordinates)
+        node.priority_cost = g + h
+
+        self.frontier.append(node)
+        self.frontier.sort(key=lambda x: x.priority_cost, reverse=True)
