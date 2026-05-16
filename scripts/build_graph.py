@@ -1,7 +1,12 @@
 import pandas as pd
 import geopandas as gpd
+from pathlib import Path
 
-mapa_rj = gpd.read_file('../data/malha_municipios_rj_ibge/RJ_Municipios_2025.shp')
+BASE_DIR  = Path(__file__).resolve().parent.parent
+DATA_PATH = BASE_DIR / "data" / "municipios_final.csv"
+MAPA_PATH = BASE_DIR / "data" / "malha_municipios_rj_ibge" / "RJ_Municipios_2025.shp"
+
+mapa_rj = gpd.read_file(MAPA_PATH)
 #print(mapa_rj.head())
 #print(mapa_rj.info())
 #print(mapa_rj['NM_MUN'].head())
@@ -27,4 +32,4 @@ for index, cidade in mapa_rj.iterrows():
     })
     i+=1
 
-pd.DataFrame(municipios_base).to_csv('../data/municipios_final.csv', index=False)
+pd.DataFrame(municipios_base).to_csv(DATA_PATH, index=False)
