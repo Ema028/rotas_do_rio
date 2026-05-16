@@ -8,6 +8,7 @@ except ModuleNotFoundError:
     from src.load_data import *
 
 test = "--test" in sys.argv
+print = log
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 if test: DATA_PATH = BASE_DIR / "data" / "municipios_teste.csv"
@@ -16,12 +17,12 @@ else: DATA_PATH = BASE_DIR / "data" / "municipios_final.csv"
 names, municipios = load_data(DATA_PATH)
 
 def main():
-    source = input("Município: ").lower().strip()
+    source = input("Município: ")
     source = normalize_name(source)
     source = municipio_id_for_name(source)
     if source is None: sys.exit("Not found.")
 
-    target = input("Município: ").lower().strip()
+    target = input("Município: ")
     target = normalize_name(target)
     target = municipio_id_for_name(target)
     if target is None: sys.exit("Not found.")
@@ -42,13 +43,15 @@ def main():
         print(f"Total of {len(path)} municipios of separation")
 
 def print_path(path):
+    path_line = []
     last_index = len(path) - 1
     for i in range(last_index):
         municipio1 = municipios[path[i][1]]["name"]
         municipio2 = municipios[path[i + 1][1]]["name"]
-        print(f"go from {municipio1} to {municipio2}", end=' ')
-        if i < last_index - 1: print("->", end=' ')
-        else: print("")
+        path_line.append(f"{municipio1} -> {municipio2}")
+
+    connected_path_line = " ➔ ".join(path_line)
+    print(connected_path_line)
 
 def shortest_path(source, target, strategy='less_distance'):
     explored = set()

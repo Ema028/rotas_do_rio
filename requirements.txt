@@ -1,3 +1,4 @@
 pandas
 geopandas
 pytest
+streamlit

@@ -1,4 +1,7 @@
 import csv
+import os
+import inspect
+import streamlit as st
 from unicodedata import normalize
 
 def load_data(DATA_PATH):
@@ -14,18 +17,24 @@ def load_data(DATA_PATH):
 
             municipios[id] = {"name": name, "neighbors": []}
 
-            if name.lower() not in names: names[name.lower()] = id
+            if name not in names: names[name.lower()] = id
 
         for row in rows:
             neighbors_distance = []
             for neighbor in row["neighbors"].split(','):
                 if ":" not in neighbor: continue
                 name, distance = neighbor.split(':')
-                name = name.strip().lower()
                 name = normalize_name(name)
                 if name in names: neighbors_distance.append((names[name], float(distance)))
             municipios[row["id"]]["neighbors"] = neighbors_distance
     return names, municipios
 
 def normalize_name(name):
-    return normalize('NFKD', name).encode('ASCII', 'ignore').decode('ASCII')
+    return normalize('NFKD', name).encode('ASCII', 'ignore').decode('ASCII').lower().strip()
+
+def log(*args, print=print, **kwargs):
+    stack = inspect.stack() #historico arquivos rodando agr
+    in_streamlit = any("app.py" in os.path.basename(frame.filename) for frame in stack)
+
+    if in_streamlit: st.write(*args, **kwargs)
+    else: print( *args, **kwargs)
