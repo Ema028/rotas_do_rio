@@ -43,15 +43,10 @@ def main():
         print(f"Total of {len(path)} municipios of separation")
 
 def print_path(path):
-    path_line = []
-    last_index = len(path) - 1
-    for i in range(last_index):
-        municipio1 = municipios[path[i][1]]["name"]
-        municipio2 = municipios[path[i + 1][1]]["name"]
-        path_line.append(f"{municipio1} -> {municipio2}")
-
-    connected_path_line = " ➔ ".join(path_line)
-    print(connected_path_line)
+    path_names = []
+    for _, id_atual in path:
+        path_names.append(municipios[id_atual]["name"])
+    print(" ➔ ".join(path_names))
 
 def shortest_path(source, target, strategy='less_distance'):
     explored = set()
