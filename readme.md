@@ -3,7 +3,7 @@
 Aplicação interativa para cálculo e visualização de rotas entre municípios do estado do Rio de Janeiro utilizando algoritmos clássicos de busca em grafos e dados geoespaciais reais do IBGE.
 
 ## Demonstração
-
+![Demonstração](demo_rotas_rio.gif)
 
 ---
 
