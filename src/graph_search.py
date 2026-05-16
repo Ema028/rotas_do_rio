@@ -30,7 +30,7 @@ def main():
     print_all(source, target)
 
 def print_path(path, cost, explored):
-    print(f"{len(path)} municípios de separação, {cost:.2f}km de distância, total de {explored} nós explorados")
+    print(f"{len(path)} municípios de separação | {cost:.2f}km de distância | {explored} nós explorados")
     path_names = []
     for _, id_atual in path:
         path_names.append(municipios[id_atual]["name"])
@@ -41,14 +41,14 @@ def print_all(source, target):
                    ('less_distance', 'Custo Uniforme (Dijkstra - Menor Quilometragem)'),
                    ('a_star', 'Algoritmo A* (Busca Otimizada com Heurística)')]
     for estrategia, descricao in estrategias:
-        print(descricao)
+        print(f"## {descricao}")
         tempo_inicio = time.perf_counter()
         path, cost, explored = shortest_path(source, target, strategy=estrategia)
         tempo_fim = time.perf_counter()
         tempo_total = (tempo_fim - tempo_inicio) * 1000
 
-        if path is None: print(f"Não conectados, Tempo de execução: {tempo_total:.5f} millisegundos, Nós explorados: {explored}\n\n")
-        else:            print_path(path, cost, explored); print(f"Tempo de execução: {tempo_total:.5f} millisegundos\n\n")
+        if path is None: print(f"Não conectados. **Tempo de execução**: {tempo_total:.5f} ms | **Nós explorados**: {explored}")
+        else:            print_path(path, cost, explored); print(f"**Tempo de execução**: {tempo_total:.5f} ms")
 
 def shortest_path(source, target, strategy='a_star'):
     explored = set()
