@@ -1,4 +1,4 @@
-from pathlib import Path
+import time
 import sys
 try:
     from structs import *
@@ -27,33 +27,28 @@ def main():
     target = municipio_id_for_name(target)
     if target is None: sys.exit("Not found.")
 
-    path, cost = shortest_path(source, target, strategy='min_degrees')
-    if path is None: print("Not connected.")
-    else:
-        print(f"Minimum of {len(path)} municipios of separation if:")
-        print_path(path)
-        print(f"Total of {cost:.2f}km of separation\n")
+    print_all(source, target)
 
-    path, cost = shortest_path(source, target, strategy='less_distance')
-    if path is None: print("Not connected.")
-    else:
-        print(f"Minimum of {cost:.2f}km of separation if:")
-        print_path(path)
-        print(f"Total of {len(path)} municipios of separation\n")
-
-    path, cost = shortest_path(source, target)
-    if path is None: print("Not connected.")
-    else:
-        print(f"Astar found {cost:.2f}km of separation with:")
-        print_path(path)
-        print(f"Total of {len(path)} municipios of separation")
-
-
-def print_path(path):
+def print_path(path, cost, explored):
+    print(f"{len(path)} municípios de separação, {cost:.2f}km de distância, total de {explored} nós explorados")
     path_names = []
     for _, id_atual in path:
         path_names.append(municipios[id_atual]["name"])
     print(" ➔ ".join(path_names))
+
+def print_all(source, target):
+    estrategias = [('min_degrees', 'Busca em Largura (BFS - Menos Municípios)'),
+                   ('less_distance', 'Custo Uniforme (Dijkstra - Menor Quilometragem)'),
+                   ('a_star', 'Algoritmo A* (Busca Otimizada com Heurística)')]
+    for estrategia, descricao in estrategias:
+        print(descricao)
+        tempo_inicio = time.perf_counter()
+        path, cost, explored = shortest_path(source, target, strategy=estrategia)
+        tempo_fim = time.perf_counter()
+        tempo_total = (tempo_fim - tempo_inicio) * 1000
+
+        if path is None: print(f"Não conectados, Tempo de execução: {tempo_total:.5f} millisegundos, Nós explorados: {explored}\n\n")
+        else:            print_path(path, cost, explored); print(f"Tempo de execução: {tempo_total:.5f} millisegundos\n\n")
 
 def shortest_path(source, target, strategy='a_star'):
     explored = set()
@@ -63,7 +58,7 @@ def shortest_path(source, target, strategy='a_star'):
     else:                             frontier = AstarFrontier(target)
     frontier.add(start)
     while True:
-        if frontier.empty(): return None, None
+        if frontier.empty(): return None, None, None
         node = frontier.remove()
         if node.state == target:
             cost = node.path_cost
@@ -72,7 +67,7 @@ def shortest_path(source, target, strategy='a_star'):
                 solution.append((node.parent, node.state))
                 node = node.parent
             solution.reverse()
-            return [(None, source)] + solution, cost
+            return [(None, source)] + solution, cost, len(explored)
         explored.add(node.state)
         for neighbor, distance in municipios[node.state]["neighbors"]:
             if not frontier.contains_state(neighbor) and neighbor not in explored:
